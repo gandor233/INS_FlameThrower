@@ -3,7 +3,7 @@
 [ATTACH]189544[/ATTACH]
 
 [SIZE="4"]Version[/SIZE]
- [LIST][*]Public 2.3[/LIST]
+ [LIST][*]Public 2.4[/LIST]
 
 [SIZE="4"]Feature list[/SIZE]
 [LIST][*]Ignite and kill other players
@@ -20,11 +20,22 @@
 [SPOILER][CODE]
 // Copy what you want to modify to your server.cfg
 
-// If you are using the official mod of the plugin author, please set it to 1, then the plugin will run
-// AddFileToDownloadsTable("custom/Flamethrower_Particles_***.vpk") and PrecacheParticleFile("particles/ins_flamethrower.pcf") automatically. 
-// If set to 0, you need to deal the particles files by yourself.
-// Default: "1"
-sm_ft_using_official_mod "1"
+// The path of the file you want the player to download in the fastdl server. Use "|" to separate.
+// Up to 20 paths. The character length of a single path cannot exceed 512.
+// Closed if empty.
+// Default: "custom/Flamethrower_Particles_dir.vpk|custom/Flamethrower_Particles_000.vpk"
+sm_ft_fastdl_file_path "custom/Flamethrower_Particles_dir.vpk|custom/Flamethrower_Particles_000.vpk"
+
+// The path of the particle file you want server to precache. Use "|" to separate.
+// Up to 20 paths. The character length of a single path cannot exceed 512.
+// Closed if empty.
+// Default: "particles/ins_flamethrower.pcf"
+sm_ft_particle_file_path "particles/ins_flamethrower.pcf"
+
+// Flamethrower fire particle effect name.
+// Don't change it if you didn't edit the particle file.
+// Default: "flamethrower"
+sm_ft_particle_effect_name "flamethrower"
 
 // Flamethrower ammo entity class name. 
 // You must set this convar if you use a different ammo class name in your theater.
@@ -34,6 +45,10 @@ sm_ft_ammo_class_name "flame_proj"
 // Burn duration
 // Default: "2.0"
 sm_ft_burn_time "2.0"
+
+// Can player ignite himself?
+// Default: "0"
+sm_ft_self_ignite "0"
 
 // Flamethrower self damage multiplier.
 // Default: "0.2"
@@ -166,13 +181,17 @@ If you don't have a fastdl server, player also need to subscribe the [URL="https
 
 [SIZE="4"]Changelog[/SIZE]
 [CODE]
+v2.4:
+* Added convar sm_ft_self_ignite.
+* Added convar sm_ft_fastdl_file_path.
+* Added convar sm_ft_particle_file_path.
+* Added convar sm_ft_particle_effect_name.
+
 v2.3:
 * Fixed flamethrower self damage multiplier.
-* Prevent players from igniting themselves.
 
 v2.2:
 * Fixed the misspelled particle effect name.
-* Added convar sm_ft_using_official_mod.
 
 v2.1:
 * Fixed missing particle effects in previous version.

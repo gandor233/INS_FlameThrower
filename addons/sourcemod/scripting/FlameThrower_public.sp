@@ -3,12 +3,14 @@
  * @Author: Gandor
  * @Github: https://github.com/gandor233
  */
+#define PLUGIN_NAME "Flamethrower"
+#define PLUGIN_VERSION "Public 2.4"
 public Plugin myinfo = 
 {
-    name = "weapon_flamethrower_p2",
+    name = "Flamethrower",
     author = "游而不擊 轉進如風",
     description = "FlameThrower plugin for insurgency(2014)",
-    version = "Public 2.3",
+    version = PLUGIN_VERSION,
     url = "https://github.com/gandor233"
 };
 
@@ -65,14 +67,18 @@ public Plugin myinfo =
 #define INS_PF_SPAWNZONE     (1 << 11)    // 11出生区              // 2048    // ENTER SPAWN ZONE (Also can resupply)
 #define INS_PF_12            (1 << 12)    // 12                    // 4096    // Unknow
 
+bool g_bFlameThrowerSelfIgnite;
 float g_fFlameThrowerBurnDuration;
 float g_fFlameThrowerFireInterval;
 float g_fFlameThrowerSelfDamageMultiplier;
 char g_cFlameThrowerAmmoName[MAX_NAME_LENGTH];
 
 ConVar DEBUG = null;
-ConVar sm_ft_using_official_mod;
+ConVar sm_ft_fastdl_file_path;
+ConVar sm_ft_particle_file_path;
+ConVar sm_ft_particle_effect_name;
 ConVar sm_ft_burn_time;
+ConVar sm_ft_self_ignite;
 ConVar sm_ft_ammo_class_name;
 ConVar sm_ft_self_damage_mult;
 ConVar sm_ft_fire_interval;
@@ -86,20 +92,24 @@ ConVar sm_ft_loop_sound_ins;
 ConVar sm_ft_end_sound_ins;
 ConVar sm_ft_empty_sound_ins;
 bool g_bIsClientFiringFlamethrower[MAXPLAYERS+1];
-
 public void OnPluginStart()
 {
     DEBUG = CreateConVar("sm_flamethrower_debug", "0", "");
-
-    sm_ft_using_official_mod = CreateConVar("sm_ft_using_official_mod", "1", "If you are using the official mod of the plugin author, please set it to 1, then the plugin will run AddFileToDownloadsTable(\"custom/Flamethrower_Particles_***.vpk\") and PrecacheParticleFile(\"particles/ins_flamethrower.pcf\") automatically. If set to 0, you need to deal the particles files by yourself.");
+    
+    sm_ft_fastdl_file_path = CreateConVar("sm_ft_fastdl_file_path", "custom/Flamethrower_Particles_dir.vpk|custom/Flamethrower_Particles_000.vpk", "The path of the file you want the player to download in the fastdl server. Use \"|\" to separate. Up to 20 paths. The character length of a single path cannot exceed 512. Closed if empty.");
+    sm_ft_particle_file_path = CreateConVar("sm_ft_particle_file_path", "particles/ins_flamethrower.pcf", "The path of the particle file you want server to precache. Use \"|\" to separate. Up to 20 paths. The character length of a single path cannot exceed 512. Closed if empty.");
+    sm_ft_particle_effect_name = CreateConVar("sm_ft_particle_effect_name", "flamethrower", "Flamethrower fire particle effect name. Don't change it if you didn't edit the particle file.");
     sm_ft_burn_time = CreateConVar("sm_ft_burn_time", "2.0", "Burn duration");
+    sm_ft_self_ignite = CreateConVar("sm_ft_self_ignite", "0", "Can player ignite himself?");
     sm_ft_ammo_class_name = CreateConVar("sm_ft_ammo_class_name", "flame_proj", "Flamethrower ammo entity class name. You must set this convar if you use a different ammo class name in your theater.");
     sm_ft_self_damage_mult = CreateConVar("sm_ft_self_damage_mult", "0.2", "Flamethrower self damage multiplier.");
     sm_ft_fire_interval = CreateConVar("sm_ft_fire_interval", "0.12", "Flamethrower launch interval. Closed if less than 0.08.");
     sm_ft_burn_time.AddChangeHook(OnConVarChanged);
+    sm_ft_self_ignite.AddChangeHook(OnConVarChanged);
     sm_ft_ammo_class_name.AddChangeHook(OnConVarChanged);
     sm_ft_self_damage_mult.AddChangeHook(OnConVarChanged);
     sm_ft_fire_interval.AddChangeHook(OnConVarChanged);
+    OnConVarChanged(null, "", "");
     
     sm_ft_sound_enable = CreateConVar("sm_ft_sound_enable", "1", "Is all plugin flamethrower fire sound enable?");
     sm_ft_start_sound_sec = CreateConVar("sm_ft_start_sound_sec", "weapons/flamethrowerno2/flamethrower_start.wav", "Flamethrower fire START sound file path for team sec. Closed if empty.");
@@ -120,15 +130,12 @@ public void OnPluginStart()
     AddTempEntHook("World Decal", TE_OnDecal);
     AddTempEntHook("Entity Decal", TE_OnDecal);
     
-    g_fFlameThrowerBurnDuration = sm_ft_burn_time.FloatValue;
-    g_fFlameThrowerFireInterval = sm_ft_fire_interval.FloatValue;
-    g_fFlameThrowerSelfDamageMultiplier = sm_ft_self_damage_mult.FloatValue;
-    sm_ft_ammo_class_name.GetString(g_cFlameThrowerAmmoName, sizeof(g_cFlameThrowerAmmoName));
     MoreFire_OnPluginStart();
     return;
 }
 public void OnConVarChanged(ConVar convar, const char[] oldValue, const char[] newValue)
 {
+    g_bFlameThrowerSelfIgnite = sm_ft_self_ignite.BoolValue;
     g_fFlameThrowerBurnDuration = sm_ft_burn_time.FloatValue;
     g_fFlameThrowerFireInterval = sm_ft_fire_interval.FloatValue;
     g_fFlameThrowerSelfDamageMultiplier = sm_ft_self_damage_mult.FloatValue;
@@ -137,7 +144,6 @@ public void OnConVarChanged(ConVar convar, const char[] oldValue, const char[] n
 }
 public void OnAllPluginsLoaded()
 {
-    PrecacheFile();
     for (int client = 0; client <= MaxClients; client++)
     {
         if (IsValidClient(client))
@@ -149,7 +155,7 @@ public void OnClientPutInServer(int client)
 {
     g_bIsClientFiringFlamethrower[client] = false;
     if (IsValidClient(client))
-		SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
+        SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 
     MoreFire_OnClientPutInServer(client);
     return;
@@ -173,14 +179,42 @@ public void OnMapEnd()
 }
 public void PrecacheFile()
 {
-    if (sm_ft_using_official_mod.BoolValue)
+    char cPathString[2048];
+    sm_ft_fastdl_file_path.GetString(cPathString, sizeof(cPathString));
+    if (strlen(cPathString) > 0)
     {
-        AddFileToDownloadsTable("custom/Flamethrower_Particles_000.vpk");
-        AddFileToDownloadsTable("custom/Flamethrower_Particles_dir.vpk");
-        PrecacheParticleFile("particles/ins_flamethrower.pcf");
+        char cPathList[20][512];
+        int iCount = ExplodeString(cPathString, "|", cPathList, sizeof(cPathList), sizeof(cPathList[]), true);
+        for (int i = 0; i < iCount; i++)
+        {
+            if (strlen(cPathList[i]) > 0)
+            {
+                AddFileToDownloadsTable(cPathList[i]);
+                PrintToServer("[ %s (%s) ] Added file to downloads table - %s.", PLUGIN_NAME, PLUGIN_VERSION, cPathList[i]);
+            }
+        }
     }
     
-    PrecacheParticleEffect("flamethrower");
+    sm_ft_particle_file_path.GetString(cPathString, sizeof(cPathString));
+    if (strlen(cPathString) > 0)
+    {
+        char cPathList[20][512];
+        int iCount = ExplodeString(cPathString, "|", cPathList, sizeof(cPathList), sizeof(cPathList[]), true);
+        for (int i = 0; i < iCount; i++)
+        {
+            if (strlen(cPathList[i]) > 0)
+            {
+                PrecacheParticleFile(cPathList[i]);
+                PrintToServer("[ %s (%s) ] Precached Particle File - %s.", PLUGIN_NAME, PLUGIN_VERSION, cPathList[i]);
+            }
+        }
+    }
+    
+    char cEffectName[2048];
+    sm_ft_particle_effect_name.GetString(cEffectName, sizeof(cEffectName));
+    PrecacheParticleEffect(cEffectName);
+    PrintToServer("[ %s (%s) ] Precached Particle Effect - %s.", PLUGIN_NAME, PLUGIN_VERSION, cEffectName);
+
     PrecacheSoundByConVar(sm_ft_start_sound_sec);
     PrecacheSoundByConVar(sm_ft_loop_sound_sec);
     PrecacheSoundByConVar(sm_ft_end_sound_sec);
@@ -210,13 +244,16 @@ public Action OnTakeDamage(int victim, int& attacker, int& inflictor, float& dam
                 GetEdictClassname(inflictor, cWeaponName, sizeof(cWeaponName));
                 if (StrContains(cWeaponName, g_cFlameThrowerAmmoName, false) > -1)
                 {
-                    BurnPlayer(attacker, victim, g_fFlameThrowerBurnDuration);
-                    
                     if (attacker == victim)
                     {
+                        if (g_bFlameThrowerSelfIgnite)
+                            BurnPlayer(attacker, victim, g_fFlameThrowerBurnDuration);
+                        
                         damage = damage * g_fFlameThrowerSelfDamageMultiplier;
                         return Plugin_Changed;
                     }
+                    else
+                        BurnPlayer(attacker, victim, g_fFlameThrowerBurnDuration);
                 }
             }
         }
