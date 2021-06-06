@@ -8,7 +8,7 @@ public Plugin myinfo =
     name = "weapon_flamethrower_p2",
     author = "游而不擊 轉進如風",
     description = "FlameThrower plugin for insurgency(2014)",
-    version = "Public 2.2",
+    version = "Public 2.3",
     url = "https://github.com/gandor233"
 };
 
@@ -149,7 +149,7 @@ public void OnClientPutInServer(int client)
 {
     g_bIsClientFiringFlamethrower[client] = false;
     if (IsValidClient(client))
-        SDKHook(client, SDKHook_TraceAttack, OnClientAttack);
+		SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 
     MoreFire_OnClientPutInServer(client);
     return;
@@ -198,7 +198,7 @@ void Event_PlayerSpawnorDeath(Event event, const char[] name, bool dontBroadcast
     g_bIsClientFiringFlamethrower[client] = false;
     return;
 }
-public Action OnClientAttack(int victim, int& attacker, int& inflictor, float& damage, int& damagetype, int& ammotype, int hitbox, int hitgroup)
+public Action OnTakeDamage(int victim, int& attacker, int& inflictor, float& damage, int& damagetype, int& weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
     if (damage > 0)
     {
@@ -851,7 +851,6 @@ public void ExtinguishEntityEx(int entity)
                 if (IsValidEdict(iFireEntity))
                 {
                     GetEntityClassname(iFireEntity, cClassname, sizeof(cClassname));
-
                     if (StrContains(cClassname, "entityflame", false) > -1)
                     {
                         if (GetEntPropEnt(iFireEntity, Prop_Data, "m_pParent") == entity)

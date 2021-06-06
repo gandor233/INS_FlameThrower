@@ -2,7 +2,7 @@
 Flamethrower plugin for insurgency(2014)
 
 ## Version
-    Public 2.2
+    Public v2.3
 
 ## Required Mod
 [其他 Extra | 喷火器 Flamethrower](https://steamcommunity.com/sharedfiles/filedetails/?id=2392887647)
@@ -173,10 +173,14 @@ If you don't have a fastdl server, player also need to subscribe the required mo
 </details>
 
 ## Credits
-Models and scripts are modified by axotn1k
+    Models and scripts are modified by axotn1k
 
 ## Changelog
 ```
+v2.3:
+* Fixed flamethrower self damage multiplier.
+* Prevent players from igniting themselves.
+
 v2.2:
 * Fixed the misspelled particle effect name.
 * Added convar sm_ft_using_official_mod.
@@ -201,4 +205,4 @@ v2.0:
 v1.0:
 * Initial release.
 ```
-中文INS服务器使用此插件请署名作者。
+中文INS服务器如使用此插件请注明和鸣谢作者。

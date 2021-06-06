@@ -3,7 +3,7 @@
 [ATTACH]189544[/ATTACH]
 
 [SIZE="4"]Version[/SIZE]
- [LIST][*]Public 2.2[/LIST]
+ [LIST][*]Public 2.3[/LIST]
 
 [SIZE="4"]Feature list[/SIZE]
 [LIST][*]Ignite and kill other players
@@ -166,6 +166,10 @@ If you don't have a fastdl server, player also need to subscribe the [URL="https
 
 [SIZE="4"]Changelog[/SIZE]
 [CODE]
+v2.3:
+* Fixed flamethrower self damage multiplier.
+* Prevent players from igniting themselves.
+
 v2.2:
 * Fixed the misspelled particle effect name.
 * Added convar sm_ft_using_official_mod.
@@ -195,7 +199,7 @@ v1.0:
 [*]Models and scripts are modified by [B]axotn1k[/B]
 [/LIST]
 
-中文INS服务器使用此插件请署名作者。
+中文INS服务器如使用此插件请注明和鸣谢作者。
 
 [SIZE="4"]Link[/SIZE]
 [LIST]
