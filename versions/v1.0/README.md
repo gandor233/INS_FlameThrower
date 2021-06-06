@@ -4,7 +4,7 @@ Flamethrower plugin for insurgency(2014)
 WeaponAttachmentAPI plugin is modified from [MitchDizzle's plugin](https://github.com/MitchDizzle/WeaponAttachmentAPI)
 
 ## Required Mod
-[其他 Extra | 喷火器 Flamethrower](https://steamcommunity.com/sharedfiles/filedetails/?id=2392887647)
+[其他 Extra | 喷火器 Flamethrower](https://steamcommunity.com/sharedfiles/filedetails/?id=2509783984)
 
 ## Convar
 ```
@@ -14,7 +14,7 @@ WeaponAttachmentAPI plugin is modified from [MitchDizzle's plugin](https://githu
 ```
 ## Guide
 To use this plugin you need to modify the original theater and create your own theater mod. If you don't know how to do it, please check the [theater modding guide](https://steamcommunity.com/sharedfiles/filedetails/?id=424392708).
-### 1. Subscribe the [required mod](https://steamcommunity.com/sharedfiles/filedetails/?id=2392887647) for your server or download it and edit it into your own mod
+### 1. Subscribe the [required mod](https://steamcommunity.com/sharedfiles/filedetails/?id=2509783984) for your server or download it and edit it into your own mod
 ### 2. Add "#base", "sounds" and "localize" to your mod main theater file
 ```
 "#base" "base/gandor233_flamethrower.theater"
@@ -84,4 +84,4 @@ Put custom\Flamethrower_Particles_dir.vpk and custom\Flamethrower_Particles_000.
 If you don't have a fastdl server, player also need to subscribe the required mod by themself, otherwise the flamethrower fire particles effect won't show up if player didn't reconnect to your server when they first join your server erverytime after they start the game program.
 
 
-中文INS服务器使用此插件请署名作者。
+中文INS服务器如使用此插件请注明作者。

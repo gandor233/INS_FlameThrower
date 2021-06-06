@@ -13,7 +13,7 @@
 
 [SIZE="4"]Required Mod[/SIZE]
 [LIST]
-[*][URL="https://steamcommunity.com/sharedfiles/filedetails/?id=2392887647"]其他 Extra | 喷火器 Flamethrower[/URL] (steam workshop id=2392887647)
+[*][URL="https://steamcommunity.com/sharedfiles/filedetails/?id=2509783984"]其他 Extra | 喷火器 Flamethrower[/URL] (steam workshop id=2509783984)
 [/LIST]
 
 [SIZE="4"]ConVar[/SIZE]
@@ -177,7 +177,7 @@ Put FlameThrower_public.smx into "insurgency\addons\sourcemod\plugins\"
 [*][SIZE="2"]Custom Particles File[/SIZE]
 Download version 2.1+ Flamethrower_Particles.zip or clone from [URL="https://github.com/gandor233/INS_FlameThrower"]github[/URL]. put Flamethrower_Particles_dir.vpk and Flamethrower_Particles_000.vpk to your fastdl folder, and make sure player is forced to download these two vpk files to them [B]insurgency/custom/[/B] folder when they join your server.
 
-If you don't have a fastdl server, player also need to subscribe the [URL="https://steamcommunity.com/sharedfiles/filedetails/?id=2392887647"]required mod[/URL] by themself, otherwise the flamethrower fire particles effect won't show up if player didn't reconnect to your server when they first join your server erverytime after they restart the game program.[/LIST][/SPOILER]
+If you don't have a fastdl server, player also need to subscribe the [URL="https://steamcommunity.com/sharedfiles/filedetails/?id=2509783984"]required mod[/URL] by themself, otherwise the flamethrower fire particles effect won't show up if player didn't reconnect to your server when they first join your server erverytime after they restart the game program.[/LIST][/SPOILER]
 
 [SIZE="4"]Changelog[/SIZE]
 [CODE]
@@ -223,7 +223,7 @@ v1.0:
 [SIZE="4"]Link[/SIZE]
 [LIST]
 [*][SIZE="4"][URL="https://github.com/gandor233/INS_FlameThrower"]Github[/URL][/SIZE]
-[*][SIZE="4"][URL="https://steamcommunity.com/sharedfiles/filedetails/?id=2392887647"]Required Mod[/URL][/SIZE]
+[*][SIZE="4"][URL="https://steamcommunity.com/sharedfiles/filedetails/?id=2509783984"]Required Mod[/URL][/SIZE]
 [/LIST]
 
 [ATTACH]189542[/ATTACH]

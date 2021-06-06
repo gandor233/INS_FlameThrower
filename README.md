@@ -5,7 +5,7 @@ Flamethrower plugin for insurgency(2014)
     Public v2.4
 
 ## Required Mod
-[其他 Extra | 喷火器 Flamethrower](https://steamcommunity.com/sharedfiles/filedetails/?id=2392887647)
+[其他 Extra | 喷火器 Flamethrower](https://steamcommunity.com/sharedfiles/filedetails/?id=2509783984)
 
 
 ## ConVar
@@ -99,7 +99,7 @@ sm_ft_empty_sound_ins ""
 To use this plugin you need to modify the original theater and create your own theater mod. 
 <br>If you don't know how to do it, please check the [theater modding guide](https://steamcommunity.com/sharedfiles/filedetails/?id=424392708).
 
-### 1. Subscribe the [required mod](https://steamcommunity.com/sharedfiles/filedetails/?id=2392887647) for your server OR download it and edit it into your own mod
+### 1. Subscribe the [required mod](https://steamcommunity.com/sharedfiles/filedetails/?id=2509783984) for your server OR download it and edit it into your own mod
 ### 2. Add "#base", "particles", "sounds" and "localize" to your mod's main theater file
 ```
 "#base" "base/gandor233_flamethrower.theater"
@@ -224,4 +224,4 @@ v2.0:
 v1.0:
 * Initial release.
 ```
-中文INS服务器如使用此插件请注明和鸣谢作者。
+中文INS服务器如使用此插件请注明作者。

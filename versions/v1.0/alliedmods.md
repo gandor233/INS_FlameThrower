@@ -21,13 +21,13 @@ This plugin uses a modified version of Mitchell's plugin [URL="https://forums.al
 
 [SIZE="4"]Required Mod[/SIZE]
 [LIST]
-[*][URL="https://steamcommunity.com/sharedfiles/filedetails/?id=2392887647"]其他 Extra | 喷火器 Flamethrower[/URL] (steam workshop id=2392887647)
+[*][URL="https://steamcommunity.com/sharedfiles/filedetails/?id=2509783984"]其他 Extra | 喷火器 Flamethrower[/URL] (steam workshop id=2509783984)
 [/LIST]
 
 [SIZE="4"]Installation Guide[/SIZE]
 To use this plugin you need to modify the original theater and create your own theater mod.
 If you don't know how to do it, please check the [URL="https://steamcommunity.com/sharedfiles/filedetails/?id=424392708"]theater modding guide[/URL].
-[SPOILER][LIST=1][*][SIZE="2"]Subscribe the [URL="https://steamcommunity.com/sharedfiles/filedetails/?id=2392887647"]required mod[/URL] for your server or download it and edit it into your own mod[/SIZE]
+[SPOILER][LIST=1][*][SIZE="2"]Subscribe the [URL="https://steamcommunity.com/sharedfiles/filedetails/?id=2509783984"]required mod[/URL] for your server or download it and edit it into your own mod[/SIZE]
 [*][SIZE="2"]Add "#base", "sounds" and "localize" to your mod main theater file[/SIZE]
 [SPOILER][CODE]"#base" "base/gandor233_flamethrower.theater"
 ...
@@ -89,14 +89,14 @@ Put FlameThrower_public.smx and WeaponAttachmentAPI.smx to "insurgency\addons\so
 [*][SIZE="2"]Custom Particles File[/SIZE]
 Download Flamethrower_Particles.zip or clone from [URL="https://github.com/gandor233/INS_FlameThrower"]github[/URL]. put Flamethrower_Particles_dir.vpk and Flamethrower_Particles_000.vpk to your fastdl folder, and make sure player is forced to download these two vpk files to them [B]insurgency/custom/[/B] folder when they join your server.
 
-If you don't have a fastdl server, player also need to subscribe the [URL="https://steamcommunity.com/sharedfiles/filedetails/?id=2392887647"]required mod[/URL] by themself, otherwise the flamethrower fire particles effect won't show up if player didn't reconnect to your server when they first join your server erverytime after they restart the game program.[/LIST][/SPOILER]
+If you don't have a fastdl server, player also need to subscribe the [URL="https://steamcommunity.com/sharedfiles/filedetails/?id=2509783984"]required mod[/URL] by themself, otherwise the flamethrower fire particles effect won't show up if player didn't reconnect to your server when they first join your server erverytime after they restart the game program.[/LIST][/SPOILER]
 
-中文INS服务器使用此插件请署名作者。
+中文INS服务器如使用此插件请注明作者。
 
 [SIZE="4"]Download Link[/SIZE]
 [LIST]
 [*][SIZE="4"][URL="https://github.com/gandor233/INS_FlameThrower"]Github[/URL][/SIZE]
-[*][SIZE="4"][URL="https://steamcommunity.com/sharedfiles/filedetails/?id=2392887647"]Required Mod[/URL][/SIZE]
+[*][SIZE="4"][URL="https://steamcommunity.com/sharedfiles/filedetails/?id=2509783984"]Required Mod[/URL][/SIZE]
 [/LIST]
 
 [ATTACH]189542[/ATTACH]
