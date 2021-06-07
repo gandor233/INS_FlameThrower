@@ -10,76 +10,33 @@ public Plugin myinfo = {
 #pragma semicolon 1
 
 ConVar DEBUG;
-ConVar sm_firstconnect_forward_enable;
 
 enum struct PLAY_CONNECT_INFO_STRUCT
 {
-    int userid;
-    int account;
+    int UserID;
+    int AccountID;
 }
-PLAY_CONNECT_INFO_STRUCT g_PlayerConnectInfo[MAXPLAYERS];
-
-bool g_bPlayerNeedReconnect[MAXPLAYERS+1];
+PLAY_CONNECT_INFO_STRUCT g_PlayerConnectInfo[2*MAXPLAYERS];
 int g_iPlayerLastReconnectTime[MAXPLAYERS+1];
-
-Handle g_hOnPlayerFirstConnect;
-int g_iFullConnectClientAccountIDList[MAXPLAYERS+1];
-int g_iFullConnectClientUserIDList[MAXPLAYERS+1];
-
-// This is a global forward. you can use it in other plugin if you running this plugin.
-public void OnPlayerFirstConnect(int client)
-{
-    if (IsValidClient(client))
-    {
-        int iUserID = GetClientUserId(client);
-        int iAccountID = GetSteamAccountID(client);
-        if (DEBUG.BoolValue)
-            PrintToServer("[OnPlayerFirstConnect] Client = %d | Time = %0.2f | iUserID = %d | iAccountID = %d", client, GetEngineTime(), iUserID, iAccountID);
-    }
-    return;
-}
 
 public void OnPluginStart()
 {
     DEBUG = CreateConVar("reconnect_debug", "0", "(bool) Is reconnect debugging?");
-    sm_firstconnect_forward_enable = CreateConVar("sm_firstconnect_forward_enable", "1", "(bool) Is first connect global forward enable?");
-    g_hOnPlayerFirstConnect = CreateGlobalForward("OnPlayerFirstConnect", ET_Ignore, Param_Cell);
     HookEvent("player_connect_full", Event_PlayerConnectFull, EventHookMode_Post);
-    
-    for (int client = 0; client <= MaxClients; client++)
-    {
-        if (IsValidClient(client))
-        {
-            int iUserID = GetClientUserId(client);
-            int iAccountID = GetSteamAccountID(client);
-            AddPlayerConnectInfo(iUserID, iAccountID);
-            g_iFullConnectClientUserIDList[client] = iUserID;
-            g_iFullConnectClientAccountIDList[client] = iAccountID;
-        }
-    }
-    
+    RegAdminCmd("listconnectinfo", Command_ListConnectInfo, ADMFLAG_ROOT);
     return;
 }
-public void OnClientPutInServer(int client)
+public void OnConfigsExecuted()
 {
-    if (IsValidClient(client))
-    {
-        if (IsPlayerFirstConnect(client))
-            g_bPlayerNeedReconnect[client] = true;
-        else
-            g_bPlayerNeedReconnect[client] = false;
-    }
-    
-    return;
+    ClearAllConnectInfo();
 }
 public Action Event_PlayerConnectFull(Event event, const char[] name, bool dontBroadcast)
 {
     int client = GetClientOfUserId(event.GetInt("userid"));
-    if (IsValidClient(client))
+    if (client > 0 && client <= MaxClients && IsClientConnected(client) && IsClientInGame(client))
     {
-        if (g_bPlayerNeedReconnect[client])
+        if (IsPlayerFirstConnect(client))
         {
-            g_bPlayerNeedReconnect[client] = false;
             g_iPlayerLastReconnectTime[client] = GetTime();
             if (DEBUG.BoolValue)
                 PrintToServer("[Forece Reconnecting] Client = %d", client);
@@ -91,20 +48,16 @@ public Action Event_PlayerConnectFull(Event event, const char[] name, bool dontB
         int iAccountID = GetSteamAccountID(client);
         if (DEBUG.BoolValue)
             PrintToServer("[PlayerConnectFull] Client = %d | Time = %0.2f | iUserID = %d | iAccountID = %d", client, GetEngineTime(), iUserID, iAccountID);
-        if (g_iFullConnectClientUserIDList[client] != iUserID || g_iFullConnectClientAccountIDList[client] != iAccountID)
-        {
-            g_iFullConnectClientUserIDList[client] = iUserID;
-            g_iFullConnectClientAccountIDList[client] = iAccountID;
-            if (sm_firstconnect_forward_enable.BoolValue)
-            {
-                Call_StartForward(g_hOnPlayerFirstConnect);
-                Call_PushCell(client);
-                Call_Finish();
-            }
-        }
     }
     
     return Plugin_Continue;
+}
+public Action Command_ListConnectInfo(int client, int args)
+{
+    for (int i = 0; i < sizeof(g_PlayerConnectInfo); i++)
+        PrintToServer("[%d] IsClientConnected %d | UserID: %d | AccountID: %d", i, (client>0)?view_as<int>(IsClientConnected(client)):0, g_PlayerConnectInfo[i].UserID, g_PlayerConnectInfo[i].AccountID);
+    
+    return Plugin_Handled;
 }
 
 public bool IsPlayerFirstConnect(int client)
@@ -112,16 +65,23 @@ public bool IsPlayerFirstConnect(int client)
     bool bIsPlayerFirstConnect = true;
     int iUserID = GetClientUserId(client);
     int iAccountID = GetSteamAccountID(client);
-    for (int i = 0; i < MaxClients; i++)
+    for (int i = 0; i < sizeof(g_PlayerConnectInfo); i++)
     {
-        if (g_PlayerConnectInfo[i].account == iAccountID)
+        if (g_PlayerConnectInfo[i].AccountID == iAccountID)
         {
-            if (g_PlayerConnectInfo[i].userid == iUserID)
+            if (g_PlayerConnectInfo[i].UserID == iUserID)
                 bIsPlayerFirstConnect = false;
-            else if (GetTime() - g_iPlayerLastReconnectTime[client] < 150)
+            else if (GetTime() - g_iPlayerLastReconnectTime[client] < 100)
                 bIsPlayerFirstConnect = false; 
+                
+            if (DEBUG.BoolValue)
+                PrintToServer("[IsPlayerFirstConnect] Client = %d | %s | Time = %0.2f | iUserID = %d | iAccountID = %d", client, bIsPlayerFirstConnect?"YES":"NO", GetEngineTime(), iUserID, iAccountID);
+            
+            g_PlayerConnectInfo[i].UserID = iUserID;
+            return bIsPlayerFirstConnect;
         }
     }
+    
     if (DEBUG.BoolValue)
         PrintToServer("[IsPlayerFirstConnect] Client = %d | %s | Time = %0.2f | iUserID = %d | iAccountID = %d", client, bIsPlayerFirstConnect?"YES":"NO", GetEngineTime(), iUserID, iAccountID);
     AddPlayerConnectInfo(iUserID, iAccountID);
@@ -130,16 +90,28 @@ public bool IsPlayerFirstConnect(int client)
 public int AddPlayerConnectInfo(int iUserID, int iAccountID)
 {
     static int iPoint = 0;
-    g_PlayerConnectInfo[iPoint].userid = iUserID;
-    g_PlayerConnectInfo[iPoint].account = iAccountID;
-    if (++iPoint >= sizeof(g_PlayerConnectInfo))
-        iPoint = 0;
-    return iPoint;
+    for (int i = iPoint+1; i != iPoint; i++)
+    {
+        if (i >= sizeof(g_PlayerConnectInfo))
+            i = 0;
+        
+        int client = GetClientOfUserId(g_PlayerConnectInfo[i].UserID);
+        if (client <= 0 || !IsClientConnected(client) || g_PlayerConnectInfo[i].AccountID == iAccountID)
+        {
+            g_PlayerConnectInfo[i].UserID = iUserID;
+            g_PlayerConnectInfo[i].AccountID = iAccountID;
+            iPoint = i;
+            return i;
+        }
+    }
+    return -1;
 }
-stock bool IsValidClient(int client)
+public void ClearAllConnectInfo()
 {
-    if (client > 0 && client <= MaxClients && IsClientConnected(client) && IsClientInGame(client))
-        return true;
-
-    return false;
+    for (int i = 0; i < sizeof(g_PlayerConnectInfo); i++)
+    {
+        g_PlayerConnectInfo[i].UserID = 0;
+        g_PlayerConnectInfo[i].AccountID = 0;
+    }
+    return;
 }
