@@ -67,9 +67,11 @@ public Plugin myinfo =
 #define INS_PF_SPAWNZONE     (1 << 11)    // 11出生区              // 2048    // ENTER SPAWN ZONE (Also can resupply)
 #define INS_PF_12            (1 << 12)    // 12                    // 4096    // Unknow
 
+bool g_bFlameThrowerIgnite;
 bool g_bFlameThrowerSelfIgnite;
 float g_fFlameThrowerBurnDuration;
 float g_fFlameThrowerFireInterval;
+float g_fFlameThrowerDamageMultiplier;
 float g_fFlameThrowerSelfDamageMultiplier;
 char g_cFlameThrowerAmmoName[MAX_NAME_LENGTH];
 
@@ -78,8 +80,10 @@ ConVar sm_ft_fastdl_file_path;
 ConVar sm_ft_particle_file_path;
 ConVar sm_ft_particle_effect_name;
 ConVar sm_ft_burn_time;
+ConVar sm_ft_ignite;
 ConVar sm_ft_self_ignite;
 ConVar sm_ft_ammo_class_name;
+ConVar sm_ft_damage_mult;
 ConVar sm_ft_self_damage_mult;
 ConVar sm_ft_fire_interval;
 ConVar sm_ft_sound_enable;
@@ -96,17 +100,21 @@ public void OnPluginStart()
 {
     DEBUG = CreateConVar("sm_flamethrower_debug", "0", "");
     
-    sm_ft_fastdl_file_path = CreateConVar("sm_ft_fastdl_file_path", "custom/Flamethrower_Particles_dir.vpk|custom/Flamethrower_Particles_000.vpk", "The path of the file you want the player to download in the fastdl server. Use \"|\" to separate. Up to 20 paths. The character length of a single path cannot exceed 512. Closed if empty.");
+    sm_ft_fastdl_file_path = CreateConVar("sm_ft_fastdl_file_path", "", "The path of the file you want the player to download in the fastdl server. Use \"|\" to separate. Up to 20 paths. The character length of a single path cannot exceed 512. Closed if empty.");
     sm_ft_particle_file_path = CreateConVar("sm_ft_particle_file_path", "particles/ins_flamethrower.pcf", "The path of the particle file you want server to precache. Use \"|\" to separate. Up to 20 paths. The character length of a single path cannot exceed 512. Closed if empty.");
     sm_ft_particle_effect_name = CreateConVar("sm_ft_particle_effect_name", "flamethrower", "Flamethrower fire particle effect name. Don't change it if you didn't edit the particle file.");
     sm_ft_burn_time = CreateConVar("sm_ft_burn_time", "2.0", "Burn duration");
-    sm_ft_self_ignite = CreateConVar("sm_ft_self_ignite", "0", "Can player ignite himself?");
+    sm_ft_ignite = CreateConVar("sm_ft_ignite", "1", "Can player ignite other players by firing flamethrower?");
+    sm_ft_self_ignite = CreateConVar("sm_ft_self_ignite", "0", "Can player ignite himself by firing flamethrower?");
     sm_ft_ammo_class_name = CreateConVar("sm_ft_ammo_class_name", "flame_proj", "Flamethrower ammo entity class name. You must set this convar if you use a different ammo class name in your theater.");
-    sm_ft_self_damage_mult = CreateConVar("sm_ft_self_damage_mult", "0.2", "Flamethrower self damage multiplier.");
+    sm_ft_damage_mult = CreateConVar("sm_ft_damage_mult", "5.0", "Flamethrower direct damage multiplier.");
+    sm_ft_self_damage_mult = CreateConVar("sm_ft_self_damage_mult", "0.2", "Flamethrower self direct damage multiplier.");
     sm_ft_fire_interval = CreateConVar("sm_ft_fire_interval", "0.12", "Flamethrower launch interval. Closed if less than 0.08.");
     sm_ft_burn_time.AddChangeHook(OnConVarChanged);
+    sm_ft_ignite.AddChangeHook(OnConVarChanged);
     sm_ft_self_ignite.AddChangeHook(OnConVarChanged);
     sm_ft_ammo_class_name.AddChangeHook(OnConVarChanged);
+    sm_ft_damage_mult.AddChangeHook(OnConVarChanged);
     sm_ft_self_damage_mult.AddChangeHook(OnConVarChanged);
     sm_ft_fire_interval.AddChangeHook(OnConVarChanged);
     OnConVarChanged(null, "", "");
@@ -135,9 +143,11 @@ public void OnPluginStart()
 }
 public void OnConVarChanged(ConVar convar, const char[] oldValue, const char[] newValue)
 {
+    g_bFlameThrowerIgnite = sm_ft_ignite.BoolValue;
     g_bFlameThrowerSelfIgnite = sm_ft_self_ignite.BoolValue;
     g_fFlameThrowerBurnDuration = sm_ft_burn_time.FloatValue;
     g_fFlameThrowerFireInterval = sm_ft_fire_interval.FloatValue;
+    g_fFlameThrowerDamageMultiplier = sm_ft_damage_mult.FloatValue;
     g_fFlameThrowerSelfDamageMultiplier = sm_ft_self_damage_mult.FloatValue;
     sm_ft_ammo_class_name.GetString(g_cFlameThrowerAmmoName, sizeof(g_cFlameThrowerAmmoName));
     return;
@@ -169,7 +179,6 @@ public void OnClientDisconnect(int client)
 public void OnMapStart()
 {
     PrecacheFile();
-    
     MoreFire_OnMapStart();
     return;
 }
@@ -244,7 +253,15 @@ public Action OnTakeDamage(int victim, int& attacker, int& inflictor, float& dam
                 GetEdictClassname(inflictor, cWeaponName, sizeof(cWeaponName));
                 if (StrContains(cWeaponName, g_cFlameThrowerAmmoName, false) > -1)
                 {
-                    if (attacker == victim)
+                    if (attacker != victim)
+                    {
+                        if (g_bFlameThrowerIgnite)
+                            BurnPlayer(attacker, victim, g_fFlameThrowerBurnDuration);
+                        
+                        damage = damage * g_fFlameThrowerDamageMultiplier;
+                        return Plugin_Changed;
+                    }
+                    else
                     {
                         if (g_bFlameThrowerSelfIgnite)
                             BurnPlayer(attacker, victim, g_fFlameThrowerBurnDuration);
@@ -252,8 +269,6 @@ public Action OnTakeDamage(int victim, int& attacker, int& inflictor, float& dam
                         damage = damage * g_fFlameThrowerSelfDamageMultiplier;
                         return Plugin_Changed;
                     }
-                    else
-                        BurnPlayer(attacker, victim, g_fFlameThrowerBurnDuration);
                 }
             }
         }

@@ -2,7 +2,7 @@
 Flamethrower plugin for insurgency(2014)
 
 ## Version
-    Public v2.4
+    Public v2.5
 
 ## Required Mod
 [其他 Extra | 喷火器 Flamethrower](https://steamcommunity.com/sharedfiles/filedetails/?id=2509783984)
@@ -18,8 +18,9 @@ Flamethrower plugin for insurgency(2014)
 // The path of the file you want the player to download in the fastdl server. Use "|" to separate.
 // Up to 20 paths. The character length of a single path cannot exceed 512.
 // Closed if empty.
-// Default: "custom/Flamethrower_Particles_dir.vpk|custom/Flamethrower_Particles_000.vpk"
-sm_ft_fastdl_file_path "custom/Flamethrower_Particles_dir.vpk|custom/Flamethrower_Particles_000.vpk"
+// Example: "custom/Flamethrower_Particles_dir.vpk|custom/Flamethrower_Particles_000.vpk"
+// Default: ""
+sm_ft_fastdl_file_path ""
 
 // The path of the particle file you want server to precache. Use "|" to separate.
 // Up to 20 paths. The character length of a single path cannot exceed 512.
@@ -42,11 +43,19 @@ sm_ft_ammo_class_name "flame_proj"
 // Default: "2.0"
 sm_ft_burn_time "2.0"
 
-// Can player ignite himself?
+// Can player ignite other players by firing flamethrower?
+// Default: "1"
+sm_ft_ignite "1"
+
+// Can player ignite himself by firing flamethrower?
 // Default: "0"
 sm_ft_self_ignite "0"
 
-// Flamethrower self damage multiplier.
+// Flamethrower direct damage multiplier.
+// Default: "5.0"
+sm_ft_damage_mult "5.0"
+
+// Flamethrower self direct damage multiplier.
 // Default: "0.2"
 sm_ft_self_damage_mult "0.2"
 
@@ -133,7 +142,7 @@ To use this plugin you need to modify the original theater and create your own t
     }
 }
 ```
-### 4. Add "weapon_flamethrower_***" to your mod's player templates allowed items
+### 4. Add "gear" and "weapon" to your mod's player templates allowed items
 ```
 "theater"
 {
@@ -181,10 +190,14 @@ To use this plugin you need to modify the original theater and create your own t
 ### 5. Install plugin
 Remove other versions of flamethrower plugin
 <br>Put FlameThrower_public.smx into "insurgency\addons\sourcemod\plugins\\"
-### 6. Particles file
-Put the version 2.1+ custom\Flamethrower_Particles_dir.vpk and custom\Flamethrower_Particles_000.vpk to your fastdl folder, and make sure player is forced to download these two vpk files to them custom folder when they join your server.
 
-If you don't have a fastdl server, player also need to subscribe the required mod by themself, otherwise the flamethrower fire particles effect won't show up if player didn't reconnect to your server when they first join your server erverytime after they start the game program.
+### 6. Particles file
+FlameThrower plugin is using a custom particle file. But this game will have some problems when loading any custom particles. Here are two solutions:
+* Method 1 [Recommend]
+<br>Install the reconnect plugin. It will force players who join the server for the first time after starting the game program to reconnect to the server once. Reconnecting can solve the problem of loading custom particle effects.
+
+* Method 2
+<br>If you have a fastdl server. Download the version 2.5+ custom\Flamethrower_Particles_dir.vpk and custom\Flamethrower_Particles_000.vpk. You can edit it to you own vpk file if you want. Put them to your fastdl server "custom" folder, setting cvar "sm_ft_fastdl_file_path" and "sm_ft_particle_file_path" and make sure player is forced to download these two vpk files to them "insurgency/custom/" folder when they join your server.
 
 </details>
 
@@ -193,6 +206,12 @@ If you don't have a fastdl server, player also need to subscribe the required mo
 
 ## Changelog
 ```
+v2.5:
+* Updated particles file.
+* Added plugin Reconnect.
+* Added convar sm_ft_ignite.
+* Added convar sm_ft_damage_mult.
+
 v2.4:
 * Added convar sm_ft_self_ignite.
 * Added convar sm_ft_fastdl_file_path.
