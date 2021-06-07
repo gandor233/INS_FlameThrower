@@ -38,7 +38,8 @@ sm_ft_particle_file_path "particles/ins_flamethrower.pcf"
 sm_ft_particle_effect_name "flamethrower"
 
 // Flamethrower ammo entity class name. 
-// You must set this convar if you use a different ammo class name in your theater.
+// You must set this if you use a different ammo entity class name in your theater. 
+// NO THE AMMO TYPE NAME.
 // Default: "flame_proj"
 sm_ft_ammo_class_name "flame_proj"
 
