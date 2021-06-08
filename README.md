@@ -194,7 +194,7 @@ Remove other versions of flamethrower plugin
 ### 6. Particles file
 FlameThrower plugin is using a custom particle file. But this game will have some problems when loading any custom particles. Here are two solutions:
 * Method 1 [Recommend]
-<br>Install the reconnect plugin. It will force players who join the server for the first time after starting the game program to reconnect to the server once. Reconnecting can solve the problem of loading custom particle effects.
+<br>Install the reconnect plugin. It will force players to reconnect to your server when they join your server. Reconnecting can solve the problem of loading custom particle effects.
 
 * Method 2
 <br>If you have a fastdl server. Download the version 2.5+ custom\Flamethrower_Particles_dir.vpk and custom\Flamethrower_Particles_000.vpk. You can edit it to you own vpk file if you want. Put them to your fastdl server "custom" folder, setting cvar "sm_ft_fastdl_file_path" and "sm_ft_particle_file_path" and make sure player is forced to download these two vpk files to them "insurgency/custom/" folder when they join your server.

@@ -10,6 +10,7 @@ public Plugin myinfo = {
 #pragma semicolon 1
 
 ConVar DEBUG;
+ConVar sm_reconnect_when_changing_map;
 
 enum struct PLAY_CONNECT_INFO_STRUCT
 {
@@ -22,13 +23,15 @@ int g_iPlayerLastReconnectTime[MAXPLAYERS+1];
 public void OnPluginStart()
 {
     DEBUG = CreateConVar("reconnect_debug", "0", "(bool) Is reconnect debugging?");
+    sm_reconnect_when_changing_map = CreateConVar("sm_reconnect_when_changing_map", "1", "(bool) Force player reconnect when changing map?");
     HookEvent("player_connect_full", Event_PlayerConnectFull, EventHookMode_Post);
     RegAdminCmd("listconnectinfo", Command_ListConnectInfo, ADMFLAG_ROOT);
     return;
 }
-public void OnConfigsExecuted()
+public void OnMapStart()
 {
-    ClearAllConnectInfo();
+    if (sm_reconnect_when_changing_map.BoolValue)
+        ClearAllConnectInfo();
 }
 public Action Event_PlayerConnectFull(Event event, const char[] name, bool dontBroadcast)
 {
@@ -56,7 +59,13 @@ public Action Command_ListConnectInfo(int client, int args)
 {
     for (int i = 0; i < sizeof(g_PlayerConnectInfo); i++)
         PrintToServer("[%d] IsClientConnected %d | UserID: %d | AccountID: %d", i, (client>0)?view_as<int>(IsClientConnected(client)):0, g_PlayerConnectInfo[i].UserID, g_PlayerConnectInfo[i].AccountID);
-    
+
+    if (client > 0 && client <= MaxClients && IsClientConnected(client) && IsClientInGame(client))
+    {
+        for (int i = 0; i < sizeof(g_PlayerConnectInfo); i++)
+            PrintToConsole(client, "[%d] IsClientConnected %d | UserID: %d | AccountID: %d", i, (client>0)?view_as<int>(IsClientConnected(client)):0, g_PlayerConnectInfo[i].UserID, g_PlayerConnectInfo[i].AccountID);
+    }
+
     return Plugin_Handled;
 }
 
