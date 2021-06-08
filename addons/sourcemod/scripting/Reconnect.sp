@@ -28,7 +28,7 @@ public void OnPluginStart()
     RegAdminCmd("listconnectinfo", Command_ListConnectInfo, ADMFLAG_ROOT);
     return;
 }
-public void OnMapStart()
+public void OnMapEnd()
 {
     if (sm_reconnect_when_changing_map.BoolValue)
         ClearAllConnectInfo();
