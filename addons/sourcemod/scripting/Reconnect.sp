@@ -58,14 +58,20 @@ public Action Event_PlayerConnectFull(Event event, const char[] name, bool dontB
 public Action Command_ListConnectInfo(int client, int args)
 {
     for (int i = 0; i < sizeof(g_PlayerConnectInfo); i++)
-        PrintToServer("[%d] IsClientConnected %d | UserID: %d | AccountID: %d", i, (client>0)?view_as<int>(IsClientConnected(client)):0, g_PlayerConnectInfo[i].UserID, g_PlayerConnectInfo[i].AccountID);
-
+    {
+        int clients = GetClientOfUserId(g_PlayerConnectInfo[i].UserID);
+        PrintToServer("[%d] IsClientConnected %d | UserID: %d | AccountID: %d", i, (clients>0)?view_as<int>(IsClientConnected(clients)):0, g_PlayerConnectInfo[i].UserID, g_PlayerConnectInfo[i].AccountID);
+    }
+    
     if (client > 0 && client <= MaxClients && IsClientConnected(client) && IsClientInGame(client))
     {
         for (int i = 0; i < sizeof(g_PlayerConnectInfo); i++)
-            PrintToConsole(client, "[%d] IsClientConnected %d | UserID: %d | AccountID: %d", i, (client>0)?view_as<int>(IsClientConnected(client)):0, g_PlayerConnectInfo[i].UserID, g_PlayerConnectInfo[i].AccountID);
+        {
+            int clients = GetClientOfUserId(g_PlayerConnectInfo[i].UserID);
+            PrintToConsole(client, "[%d] IsClientConnected %d | UserID: %d | AccountID: %d", i, (clients>0)?view_as<int>(IsClientConnected(clients)):0, g_PlayerConnectInfo[i].UserID, g_PlayerConnectInfo[i].AccountID);
+        }
     }
-
+    
     return Plugin_Handled;
 }
 
