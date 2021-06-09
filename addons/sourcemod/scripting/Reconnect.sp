@@ -27,7 +27,7 @@ PLAY_CONNECT_INFO_STRUCT g_PlayerConnectInfo[2*MAXPLAYERS];
 public void OnPluginStart()
 {
     DEBUG = CreateConVar("reconnect_debug", "0", "(bool) Is reconnect debugging?");
-    sm_reconnect_max_interval = CreateConVar("sm_reconnect_max_interval", "60", "(int) Force player reconnect maximum interval time");
+    sm_reconnect_max_interval = CreateConVar("sm_reconnect_max_interval", "60", "(int) If the time since player last connect to server is less than sm_reconnect_max_interval, then player will no need to reconnect in any case.");
     sm_reconnect_when_changing_map = CreateConVar("sm_reconnect_when_changing_map", "1", "(bool) Force player reconnect when changing map?");
     // g_hOnPlayerFirstConnect = CreateGlobalForward("OnPlayerFirstConnect", ET_Ignore, Param_Cell);
     // for (int client = 1; client <= MaxClients; client++)
