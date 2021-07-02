@@ -10,8 +10,9 @@ public Plugin myinfo = {
 #pragma semicolon 1
 
 ConVar DEBUG;
-ConVar sm_reconnect_max_interval;
-ConVar sm_reconnect_when_changing_map;
+ConVar sm_rc_max_interval;
+ConVar sm_rc_when_changing_map;
+ConVar sm_rc_first_connect_forward_enable;
 
 enum struct PLAY_CONNECT_INFO_STRUCT
 {
@@ -21,23 +22,25 @@ enum struct PLAY_CONNECT_INFO_STRUCT
 }
 PLAY_CONNECT_INFO_STRUCT g_PlayerConnectInfo[2*MAXPLAYERS];
 
-// Handle g_hOnPlayerFirstConnect;
-// int g_iFullConnectClientUserIDList[MAXPLAYERS+1];
-// int g_iFullConnectClientAccountIDList[MAXPLAYERS+1];
+Handle g_hOnPlayerFirstConnect;
+int g_iFullConnectClientUserIDList[MAXPLAYERS+1];
+int g_iFullConnectClientAccountIDList[MAXPLAYERS+1];
 public void OnPluginStart()
 {
     DEBUG = CreateConVar("reconnect_debug", "0", "(bool) Is reconnect debugging?");
-    sm_reconnect_max_interval = CreateConVar("sm_reconnect_max_interval", "60", "(int) If the time since player last connect to server is less than sm_reconnect_max_interval, then player will no need to reconnect in any case.");
-    sm_reconnect_when_changing_map = CreateConVar("sm_reconnect_when_changing_map", "1", "(bool) Force player reconnect when changing map?");
-    // g_hOnPlayerFirstConnect = CreateGlobalForward("OnPlayerFirstConnect", ET_Ignore, Param_Cell);
-    // for (int client = 1; client <= MaxClients; client++)
-    // {
-    //     if (IsClientConnected(client) && IsClientInGame(client))
-    //     {
-    //         g_iFullConnectClientUserIDList[client] = GetClientUserId(client);
-    //         g_iFullConnectClientAccountIDList[client] = GetSteamAccountID(client);
-    //     }
-    // }
+    sm_rc_when_changing_map = CreateConVar("sm_rc_when_changing_map", "1", "(bool) Force player reconnect when changing map?");
+    sm_rc_max_interval = CreateConVar("sm_rc_max_interval", "60", "(int) If the time since player last connect to server is less than sm_rc_max_interval, then player will no need to reconnect in any case.");
+    sm_rc_first_connect_forward_enable = CreateConVar("sm_rc_first_connect_forward_enable", "1", "(bool) Is first connect forward enable?");
+
+    g_hOnPlayerFirstConnect = CreateGlobalForward("OnPlayerFirstConnect", ET_Ignore, Param_Cell);
+    for (int client = 1; client <= MaxClients; client++)
+    {
+        if (IsClientConnected(client) && IsClientInGame(client))
+        {
+            g_iFullConnectClientUserIDList[client] = GetClientUserId(client);
+            g_iFullConnectClientAccountIDList[client] = GetSteamAccountID(client);
+        }
+    }
     
     HookEvent("player_connect_full", Event_PlayerConnectFull, EventHookMode_Post);
     RegAdminCmd("listconnectinfo", Command_ListConnectInfo, ADMFLAG_ROOT);
@@ -45,7 +48,7 @@ public void OnPluginStart()
 }
 public void OnMapEnd()
 {
-    if (sm_reconnect_when_changing_map.BoolValue)
+    if (sm_rc_when_changing_map.BoolValue)
         ClearAllConnectInfo();
 }
 public Action Event_PlayerConnectFull(Event event, const char[] name, bool dontBroadcast)
@@ -63,15 +66,21 @@ public Action Event_PlayerConnectFull(Event event, const char[] name, bool dontB
         
         int iUserID = GetClientUserId(client);
         int iAccountID = GetSteamAccountID(client);
-        // if (g_iFullConnectClientUserIDList[client] != iUserID || g_iFullConnectClientAccountIDList[client] != iAccountID)
-        // {
-        //     g_iFullConnectClientUserIDList[client] = iUserID;
-        //     g_iFullConnectClientAccountIDList[client] = iAccountID;
-        //     Call_StartForward(g_hOnPlayerFirstConnect);
-        //     Call_PushCell(client);
-        //     Call_Finish();
-        // }
-        if (DEBUG.BoolValue)
+        if (sm_rc_first_connect_forward_enable.BoolValue)
+        {
+            if (g_iFullConnectClientUserIDList[client] != iUserID || g_iFullConnectClientAccountIDList[client] != iAccountID)
+            {
+                g_iFullConnectClientUserIDList[client] = iUserID;
+                g_iFullConnectClientAccountIDList[client] = iAccountID;
+                Call_StartForward(g_hOnPlayerFirstConnect);
+                Call_PushCell(client);
+                Call_Finish();
+                
+                if (DEBUG.BoolValue)
+                    LogMessage("[OnPlayerFirstConnect] Client = %d - %N | iUserID = %d | iAccountID = %d", client, client, iUserID, iAccountID);
+            }
+        }
+        else if (DEBUG.BoolValue)
             LogMessage("[PlayerConnectFull] Client = %d - %N | iUserID = %d | iAccountID = %d", client, client, iUserID, iAccountID);
     }
     
@@ -108,7 +117,7 @@ public bool IsPlayerFirstConnect(int client)
         {
             if (g_PlayerConnectInfo[i].UserID == iUserID)
                 bIsPlayerFirstConnect = false;
-            else if (GetTime() - g_PlayerConnectInfo[i].LastConnectTime < sm_reconnect_max_interval.IntValue)
+            else if (GetTime() - g_PlayerConnectInfo[i].LastConnectTime < sm_rc_max_interval.IntValue)
                 bIsPlayerFirstConnect = false; 
                 
             if (DEBUG.BoolValue)
@@ -147,7 +156,8 @@ public int AddPlayerConnectInfo(int iUserID, int iAccountID)
 }
 public void ClearAllConnectInfo()
 {
-    LogMessage("[Reconnecting] ClearAllConnectInfo......");
+    if (DEBUG.BoolValue)
+        LogMessage("[Reconnecting] ClearAllConnectInfo......");
     for (int i = 0; i < sizeof(g_PlayerConnectInfo); i++)
     {
         g_PlayerConnectInfo[i].UserID = 0;

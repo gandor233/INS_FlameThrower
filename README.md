@@ -2,7 +2,7 @@
 Flamethrower plugin for insurgency(2014)
 
 ## Version
-    Public v2.5
+    Public v2.6
 
 ## Required Mod
 [其他 Extra | 喷火器 Flamethrower](https://steamcommunity.com/sharedfiles/filedetails/?id=2509783984)
@@ -43,21 +43,29 @@ sm_ft_ammo_class_name "flame_proj"
 // Default: "2.0"
 sm_ft_burn_time "2.0"
 
-// Can player ignite other players by firing flamethrower?
-// Default: "1"
-sm_ft_ignite "1"
-
 // Can player ignite himself by firing flamethrower?
 // Default: "0"
 sm_ft_self_ignite "0"
 
-// Flamethrower direct damage multiplier.
-// Default: "5.0"
-sm_ft_damage_mult "5.0"
+// Can player ignite enemy players by firing flamethrower?
+// Default: "1"
+sm_ft_ignite_enemy "1"
+
+// Can player ignite friend players by firing flamethrower?
+// Default: "1"
+sm_ft_ignite_friend "1"
 
 // Flamethrower self direct damage multiplier.
 // Default: "0.2"
 sm_ft_self_damage_mult "0.2"
+
+// Flamethrower direct damage multiplier for enemies.
+// Default: "5.0"
+sm_ft_enemy_damage_mult "5.0"
+
+// Flamethrower direct damage multiplier for friends.
+// Default: "1.0"
+sm_ft_friend_damage_mult "1.0"
 
 // Flamethrower launch interval. Closed if less than 0.08.
 // Default: "0.12"
@@ -206,6 +214,14 @@ FlameThrower plugin is using a custom particle file. But this game will have som
 
 ## Changelog
 ```
+v2.6:
+* Removed convar sm_ft_ignite.
+* Added convar sm_ft_ignite_enemy.
+* Added convar sm_ft_ignite_friend.
+* Removed convar sm_ft_damage_mult.
+* Added convar sm_ft_enemy_damage_mult.
+* Added convar sm_ft_friend_damage_mult.
+
 v2.5:
 * Updated particles file.
 * Added plugin Reconnect.

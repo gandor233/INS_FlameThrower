@@ -4,7 +4,7 @@
  * @Github: https://github.com/gandor233
  */
 #define PLUGIN_NAME "Flamethrower"
-#define PLUGIN_VERSION "Public 2.4"
+#define PLUGIN_VERSION "Public 2.6"
 public Plugin myinfo = 
 {
     name = "Flamethrower",
@@ -67,11 +67,13 @@ public Plugin myinfo =
 #define INS_PF_SPAWNZONE     (1 << 11)    // 11出生区              // 2048    // ENTER SPAWN ZONE (Also can resupply)
 #define INS_PF_12            (1 << 12)    // 12                    // 4096    // Unknow
 
-bool g_bFlameThrowerIgnite;
+bool g_bFlameThrowerIgniteEnemy;
+bool g_bFlameThrowerIgniteFriend;
 bool g_bFlameThrowerSelfIgnite;
 float g_fFlameThrowerBurnDuration;
 float g_fFlameThrowerFireInterval;
-float g_fFlameThrowerDamageMultiplier;
+float g_fFlameThrowerEnemyDamageMultiplier;
+float g_fFlameThrowerFriendDamageMultiplier;
 float g_fFlameThrowerSelfDamageMultiplier;
 char g_cFlameThrowerAmmoName[MAX_NAME_LENGTH];
 
@@ -80,10 +82,12 @@ ConVar sm_ft_fastdl_file_path;
 ConVar sm_ft_particle_file_path;
 ConVar sm_ft_particle_effect_name;
 ConVar sm_ft_burn_time;
-ConVar sm_ft_ignite;
 ConVar sm_ft_self_ignite;
+ConVar sm_ft_ignite_enemy;
+ConVar sm_ft_ignite_friend;
 ConVar sm_ft_ammo_class_name;
-ConVar sm_ft_damage_mult;
+ConVar sm_ft_enemy_damage_mult;
+ConVar sm_ft_friend_damage_mult;
 ConVar sm_ft_self_damage_mult;
 ConVar sm_ft_fire_interval;
 ConVar sm_ft_sound_enable;
@@ -104,17 +108,21 @@ public void OnPluginStart()
     sm_ft_particle_file_path = CreateConVar("sm_ft_particle_file_path", "particles/ins_flamethrower.pcf", "The path of the particle file you want server to precache. Use \"|\" to separate. Up to 20 paths. The character length of a single path cannot exceed 512. Closed if empty.");
     sm_ft_particle_effect_name = CreateConVar("sm_ft_particle_effect_name", "flamethrower", "Flamethrower fire particle effect name. Don't change it if you didn't edit the particle file.");
     sm_ft_burn_time = CreateConVar("sm_ft_burn_time", "2.0", "Burn duration");
-    sm_ft_ignite = CreateConVar("sm_ft_ignite", "1", "Can player ignite other players by firing flamethrower?");
     sm_ft_self_ignite = CreateConVar("sm_ft_self_ignite", "0", "Can player ignite himself by firing flamethrower?");
+    sm_ft_ignite_enemy = CreateConVar("sm_ft_ignite_enemy", "1", "Can player ignite enemy players by firing flamethrower?");
+    sm_ft_ignite_friend = CreateConVar("sm_ft_ignite_friend", "1", "Can player ignite friend players by firing flamethrower?");
     sm_ft_ammo_class_name = CreateConVar("sm_ft_ammo_class_name", "flame_proj", "Flamethrower ammo entity class name. You must set this convar if you use a different ammo class name in your theater.");
-    sm_ft_damage_mult = CreateConVar("sm_ft_damage_mult", "5.0", "Flamethrower direct damage multiplier.");
     sm_ft_self_damage_mult = CreateConVar("sm_ft_self_damage_mult", "0.2", "Flamethrower self direct damage multiplier.");
+    sm_ft_enemy_damage_mult = CreateConVar("sm_ft_enemy_damage_mult", "5.0", "Flamethrower direct damage multiplier for enemies.");
+    sm_ft_friend_damage_mult = CreateConVar("sm_ft_friend_damage_mult", "1.0", "Flamethrower direct damage multiplier for friends.");
     sm_ft_fire_interval = CreateConVar("sm_ft_fire_interval", "0.12", "Flamethrower launch interval. Closed if less than 0.08.");
     sm_ft_burn_time.AddChangeHook(OnConVarChanged);
-    sm_ft_ignite.AddChangeHook(OnConVarChanged);
     sm_ft_self_ignite.AddChangeHook(OnConVarChanged);
+    sm_ft_ignite_enemy.AddChangeHook(OnConVarChanged);
+    sm_ft_ignite_friend.AddChangeHook(OnConVarChanged);
     sm_ft_ammo_class_name.AddChangeHook(OnConVarChanged);
-    sm_ft_damage_mult.AddChangeHook(OnConVarChanged);
+    sm_ft_enemy_damage_mult.AddChangeHook(OnConVarChanged);
+    sm_ft_friend_damage_mult.AddChangeHook(OnConVarChanged);
     sm_ft_self_damage_mult.AddChangeHook(OnConVarChanged);
     sm_ft_fire_interval.AddChangeHook(OnConVarChanged);
     OnConVarChanged(null, "", "");
@@ -143,12 +151,14 @@ public void OnPluginStart()
 }
 public void OnConVarChanged(ConVar convar, const char[] oldValue, const char[] newValue)
 {
-    g_bFlameThrowerIgnite = sm_ft_ignite.BoolValue;
     g_bFlameThrowerSelfIgnite = sm_ft_self_ignite.BoolValue;
+    g_bFlameThrowerIgniteEnemy = sm_ft_ignite_enemy.BoolValue;
+    g_bFlameThrowerIgniteFriend = sm_ft_ignite_friend.BoolValue;
     g_fFlameThrowerBurnDuration = sm_ft_burn_time.FloatValue;
     g_fFlameThrowerFireInterval = sm_ft_fire_interval.FloatValue;
-    g_fFlameThrowerDamageMultiplier = sm_ft_damage_mult.FloatValue;
     g_fFlameThrowerSelfDamageMultiplier = sm_ft_self_damage_mult.FloatValue;
+    g_fFlameThrowerEnemyDamageMultiplier = sm_ft_enemy_damage_mult.FloatValue;
+    g_fFlameThrowerFriendDamageMultiplier = sm_ft_friend_damage_mult.FloatValue;
     sm_ft_ammo_class_name.GetString(g_cFlameThrowerAmmoName, sizeof(g_cFlameThrowerAmmoName));
     return;
 }
@@ -244,31 +254,38 @@ void Event_PlayerSpawnorDeath(Event event, const char[] name, bool dontBroadcast
 public Action OnTakeDamage(int victim, int& attacker, int& inflictor, float& damage, int& damagetype, int& weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
     if (damage > 0)
-    {
-        if (IsValidClient(victim))
+{
+        if (inflictor > MaxClients && IsValidEntity(inflictor))
         {
-            if (inflictor > MaxClients && IsValidEntity(inflictor))
+            if (IsValidClient(victim))
             {
                 char cWeaponName[MAX_NAME_LENGTH];
                 GetEdictClassname(inflictor, cWeaponName, sizeof(cWeaponName));
                 if (StrContains(cWeaponName, g_cFlameThrowerAmmoName, false) > -1)
                 {
-                    if (attacker != victim)
-                    {
-                        if (g_bFlameThrowerIgnite)
-                            BurnPlayer(attacker, victim, g_fFlameThrowerBurnDuration);
-                        
-                        damage = damage * g_fFlameThrowerDamageMultiplier;
-                        return Plugin_Changed;
-                    }
-                    else
+                    if (attacker == victim)
                     {
                         if (g_bFlameThrowerSelfIgnite)
                             BurnPlayer(attacker, victim, g_fFlameThrowerBurnDuration);
-                        
                         damage = damage * g_fFlameThrowerSelfDamageMultiplier;
-                        return Plugin_Changed;
                     }
+                    else
+                    {
+                        if (IsValidClient(attacker) && GetClientTeam(attacker) == GetClientTeam(victim))
+                        {
+                            if (g_bFlameThrowerIgniteFriend)
+                                BurnPlayer(attacker, victim, g_fFlameThrowerBurnDuration);
+                            damage = damage * g_fFlameThrowerFriendDamageMultiplier;
+                        }
+                        else
+                        {
+                            if (g_bFlameThrowerIgniteEnemy)
+                                BurnPlayer(attacker, victim, g_fFlameThrowerBurnDuration);
+                            damage = damage * g_fFlameThrowerEnemyDamageMultiplier;
+                        }
+                    }
+                    
+                    return Plugin_Changed;
                 }
             }
         }
@@ -307,7 +324,7 @@ public void Event_WeaponFire(Event event, char[] name, bool Broadcast)
                             sm_ft_start_sound_ins.GetString(cStartSoundPath, sizeof(cStartSoundPath));
                         
                         if (strlen(cStartSoundPath) > 0)
-                            GiveEntitySound(client, cStartSoundPath, 1.0, 80, SNDCHAN_WEAPON);
+                            GiveEntitySound(client, cStartSoundPath, 1.0, 80, SNDCHAN_STATIC);
                     }
                 }
             }
@@ -352,7 +369,7 @@ public void Event_WeaponFireOnEmpty(Event event, char[] name, bool Broadcast)
                         sm_ft_empty_sound_ins.GetString(cEmptySoundPath, sizeof(cEmptySoundPath));
                     
                     if (strlen(cEmptySoundPath) > 0)
-                        GiveEntitySound(client, cEmptySoundPath, 1.0, 80, SNDCHAN_WEAPON);
+                        GiveEntitySound(client, cEmptySoundPath, 1.0, 80, SNDCHAN_STATIC);
                 }
             }
         }
@@ -402,7 +419,7 @@ public Action CheckPlayerFireDelay_Timer(Handle timer, DataPack hDataPack)
                 sm_ft_loop_sound_ins.GetString(cLoopSoundPath, sizeof(cLoopSoundPath));
             
             if (strlen(cLoopSoundPath) > 0)
-                GiveEntitySound(client, cLoopSoundPath, 1.0, 80, SNDCHAN_WEAPON);
+                GiveEntitySound(client, cLoopSoundPath, 1.0, 80, SNDCHAN_STATIC);
         }
     }
 
@@ -493,21 +510,21 @@ stock void StopClientFlamethrowerSound(int client, bool bImmediately = false)
         else
             sm_ft_end_sound_ins.GetString(cEndSoundPath, sizeof(cEndSoundPath));
         if (strlen(cEndSoundPath) > 0)
-            GiveEntitySound(client, cEndSoundPath, 1.0, 80, SNDCHAN_WEAPON);
+            GiveEntitySound(client, cEndSoundPath, 1.0, 80, SNDCHAN_STATIC);
         
         char cLoopSoundPath[512];
         sm_ft_loop_sound_sec.GetString(cLoopSoundPath, sizeof(cLoopSoundPath));
-        StopEntitySound(client, cLoopSoundPath, SNDCHAN_WEAPON);
+        StopEntitySound(client, cLoopSoundPath, SNDCHAN_STATIC);
         sm_ft_loop_sound_ins.GetString(cLoopSoundPath, sizeof(cLoopSoundPath));
-        StopEntitySound(client, cLoopSoundPath, SNDCHAN_WEAPON);
+        StopEntitySound(client, cLoopSoundPath, SNDCHAN_STATIC);
     }
     else
     {
         char cLoopSoundPath[512];
         sm_ft_loop_sound_sec.GetString(cLoopSoundPath, sizeof(cLoopSoundPath));
-        StopEntitySound(client, cLoopSoundPath, SNDCHAN_WEAPON);
+        StopEntitySound(client, cLoopSoundPath, SNDCHAN_STATIC);
         sm_ft_loop_sound_ins.GetString(cLoopSoundPath, sizeof(cLoopSoundPath));
-        StopEntitySound(client, cLoopSoundPath, SNDCHAN_WEAPON);
+        StopEntitySound(client, cLoopSoundPath, SNDCHAN_STATIC);
     }
     
     return;
@@ -516,7 +533,7 @@ public bool PrecacheSoundByConVar(ConVar hConVar)
 {
     char cSoundPath[512];
     hConVar.GetString(cSoundPath, sizeof(cSoundPath));
-    if (strlen(cSoundPath) > 0)
+    if (strlen(cSoundPath) > 1)
         return PrecacheSound(cSoundPath);
     else
         return false;
@@ -888,7 +905,7 @@ public void ExtinguishEntityEx(int entity)
         // 玩家死亡时就算用的EventHookMode_Pre也无法使用m_hEffectEntity来获得火焰，只能遍历
         // 直接KILL会导致再次spawn前无法再着火
         int iFireEntity = GetEntPropEnt(entity, Prop_Data, "m_hEffectEntity");
-        if (IsValidEdict(iFireEntity))
+        if (IsValidEdict(iFireEntity) && HasEntProp(iFireEntity, Prop_Data, "m_flLifetime"))
         {
             AcceptEntityInput(iFireEntity, "DisableDraw");
             AcceptEntityInput(iFireEntity, "DisableDamageForces");
