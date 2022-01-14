@@ -898,7 +898,7 @@ public int IsEntityOnFire(int entity)
 }
 char g_cAntiFlameEntityNameList[][] = 
 {
-    "func_door", // Will crash server
+    "func_", // Will crash server
 };
 public void IgniteEntityEx(int entity, float time)
 {
