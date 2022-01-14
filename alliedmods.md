@@ -3,7 +3,7 @@
 [ATTACH]189544[/ATTACH]
 
 [SIZE="4"]Version[/SIZE]
- [LIST][*]Public 2.7[/LIST]
+ [LIST][*]Public 2.8[/LIST]
 
 [SIZE="4"]Feature list[/SIZE]
 [LIST][*]Ignite and kill other players
@@ -204,8 +204,11 @@ If you have a fastdl server. Download version 2.5+ Flamethrower_Particles.zip or
 
 [SIZE="4"]Changelog[/SIZE]
 [CODE]
+v2.8:
+* Fixed fire loop sound doesn't stop problem.
+
 v2.7:
-* Fixed fire on func_* entity crash server bug.
+* Fixed fire on func_* entity crash server problem.
 
 v2.6:
 * Removed convar sm_ft_ignite.

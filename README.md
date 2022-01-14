@@ -2,7 +2,7 @@
 Flamethrower plugin for insurgency(2014)
 
 ## Version
-    Public v2.7
+    Public v2.8
 
 ## Required Mod
 [其他 Extra | 喷火器 Flamethrower](https://steamcommunity.com/sharedfiles/filedetails/?id=2509783984)
@@ -214,8 +214,11 @@ FlameThrower plugin is using a custom particle file. But this game will have som
 
 ## Changelog
 ```
+v2.8:
+* Fixed fire loop sound doesn't stop problem.
+
 v2.7:
-* Fixed fire on func_* entity crash server bug.
+* Fixed fire on func_* entity crash server problem.
 
 v2.6:
 * Removed convar sm_ft_ignite.

@@ -4,7 +4,7 @@
  * @Github: https://github.com/gandor233
  */
 #define PLUGIN_NAME "Flamethrower"
-#define PLUGIN_VERSION "Public 2.7"
+#define PLUGIN_VERSION "Public 2.8"
 public Plugin myinfo = 
 {
     name = "Flamethrower",
@@ -948,6 +948,10 @@ public void ExtinguishEntityEx(int entity)
         int iFireEntity = GetEntPropEnt(entity, Prop_Data, "m_hEffectEntity");
         if (IsValidEdict(iFireEntity) && HasEntProp(iFireEntity, Prop_Data, "m_flLifetime"))
         {
+            StopEntitySound(iFireEntity, "ambient/fire/fire_small_loop2.wav");
+            StopEntitySound(iFireEntity, "ambient/fire/fire_small_loop_edit_01.wav");
+            StopEntitySound(iFireEntity, "ambient/fire/fire_small_loop_edit_02.wav");
+            StopEntitySound(iFireEntity, "ambient/fire/fire_small_loop_edit_03.wav");
             AcceptEntityInput(iFireEntity, "DisableDraw");
             AcceptEntityInput(iFireEntity, "DisableDamageForces");
             SetEntPropFloat(iFireEntity, Prop_Data, "m_flLifetime", 0.0);
@@ -965,6 +969,10 @@ public void ExtinguishEntityEx(int entity)
                     {
                         if (GetEntPropEnt(iFireEntity, Prop_Data, "m_pParent") == entity)
                         {
+                            StopEntitySound(iFireEntity, "ambient/fire/fire_small_loop2.wav");
+                            StopEntitySound(iFireEntity, "ambient/fire/fire_small_loop_edit_01.wav");
+                            StopEntitySound(iFireEntity, "ambient/fire/fire_small_loop_edit_02.wav");
+                            StopEntitySound(iFireEntity, "ambient/fire/fire_small_loop_edit_03.wav");
                             AcceptEntityInput(iFireEntity, "DisableDraw");
                             AcceptEntityInput(iFireEntity, "DisableDamageForces");
                             SetEntPropFloat(iFireEntity, Prop_Data, "m_flLifetime", 0.0);
