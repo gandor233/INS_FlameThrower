@@ -922,13 +922,11 @@ void IgniteEntityNextFrame(DataPack hDataPack)
         {
             char cEntityName[128];
             GetEntityClassname(entity, cEntityName, sizeof(cEntityName));
-            for (int i = 0; i < sizeof(g_cAntiFlameEntityNameList); i++)
+            if (!IsAntiFlameEntityName(cEntityName))
             {
-                if (StrEqual(cEntityName, g_cAntiFlameEntityNameList[i], false))
-                    return;
+                LogMessage("IgniteEntity entity=%d-%s time=%0.1f", entity, cEntityName, time);
+                IgniteEntity(entity, time);
             }
-            LogMessage("IgniteEntity entity=%d-%s time=%0.1f", entity, cEntityName, time);
-            IgniteEntity(entity, time);
         }
     }
     
@@ -940,13 +938,13 @@ public void ExtinguishEntityEx(int entity)
     {
         char cEntityName[128];
         GetEntityClassname(entity, cEntityName, sizeof(cEntityName));
-        for (int i = 0; i < sizeof(g_cAntiFlameEntityNameList); i++)
+        
+        if (!IsAntiFlameEntityName(cEntityName))
         {
-            if (StrEqual(cEntityName, g_cAntiFlameEntityNameList[i], false))
-                return;
+            LogMessage("ExtinguishEntity entity=%d-%s", entity, cEntityName);
+            ExtinguishEntity(entity);
         }
-        LogMessage("ExtinguishEntity entity=%d-%s", entity, cEntityName);
-        ExtinguishEntity(entity);
+        
         // 玩家死亡时就算用的EventHookMode_Pre也无法使用m_hEffectEntity来获得火焰，只能遍历
         // 直接KILL会导致再次spawn前无法再着火
         int iFireEntity = GetEntPropEnt(entity, Prop_Data, "m_hEffectEntity");
@@ -981,6 +979,15 @@ public void ExtinguishEntityEx(int entity)
     }
 
     return;
+}
+public bool IsAntiFlameEntityName(char[] cEntityName)
+{
+    for (int i = 0; i < sizeof(g_cAntiFlameEntityNameList); i++)
+    {
+        if (StrEqual(cEntityName, g_cAntiFlameEntityNameList[i], false))
+            return true;
+    }
+    return false;
 }
 stock void GiveEntitySound(int entity, const char[] cPath, float fVolume = SNDVOL_NORMAL, int iLevel = SNDLEVEL_NORMAL, int iChannel = SNDCHAN_AUTO)
 {
