@@ -896,10 +896,6 @@ public int IsEntityOnFire(int entity)
     }
     return false;
 }
-char g_cAntiFlameEntityNameList[][] = 
-{
-    "func_", // Will crash server
-};
 public void IgniteEntityEx(int entity, float time)
 {
     DataPack hDataPack = new DataPack();
@@ -982,6 +978,10 @@ public void ExtinguishEntityEx(int entity)
 
     return;
 }
+char g_cAntiFlameEntityNameList[][] = 
+{
+    "func_", // Will crash server
+};
 public bool IsAntiFlameEntityName(char[] cEntityName)
 {
     for (int i = 0; i < sizeof(g_cAntiFlameEntityNameList); i++)
