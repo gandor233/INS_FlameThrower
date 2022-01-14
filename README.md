@@ -216,6 +216,7 @@ FlameThrower plugin is using a custom particle file. But this game will have som
 ```
 v2.8:
 * Fixed fire loop sound doesn't stop problem.
+* Replaced Reconnect with lol_reconnect.
 
 v2.7:
 * Fixed fire on func_* entity crash server problem.

@@ -206,6 +206,7 @@ If you have a fastdl server. Download version 2.5+ Flamethrower_Particles.zip or
 [CODE]
 v2.8:
 * Fixed fire loop sound doesn't stop problem.
+* Replaced Reconnect with lol_reconnect.
 
 v2.7:
 * Fixed fire on func_* entity crash server problem.
