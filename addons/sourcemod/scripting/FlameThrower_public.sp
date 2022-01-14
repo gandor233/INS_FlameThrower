@@ -924,7 +924,8 @@ void IgniteEntityNextFrame(DataPack hDataPack)
             GetEntityClassname(entity, cEntityName, sizeof(cEntityName));
             if (!IsAntiFlameEntityName(cEntityName))
             {
-                LogMessage("IgniteEntity entity=%d-%s time=%0.1f", entity, cEntityName, time);
+                if (DEBUG)
+                    LogMessage("IgniteEntity entity=%d-%s time=%0.1f", entity, cEntityName, time);
                 IgniteEntity(entity, time);
             }
         }
@@ -941,7 +942,8 @@ public void ExtinguishEntityEx(int entity)
         
         if (!IsAntiFlameEntityName(cEntityName))
         {
-            LogMessage("ExtinguishEntity entity=%d-%s", entity, cEntityName);
+            if (DEBUG)
+                LogMessage("ExtinguishEntity entity=%d-%s", entity, cEntityName);
             ExtinguishEntity(entity);
         }
         
