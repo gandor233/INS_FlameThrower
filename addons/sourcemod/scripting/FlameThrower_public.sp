@@ -4,7 +4,7 @@
  * @Github: https://github.com/gandor233
  */
 #define PLUGIN_NAME "Flamethrower"
-#define PLUGIN_VERSION "Public 2.6"
+#define PLUGIN_VERSION "Public 2.7"
 public Plugin myinfo = 
 {
     name = "Flamethrower",
@@ -438,7 +438,6 @@ public Action CheckPlayerFireDelay_Timer(Handle timer, DataPack hDataPack)
         CreateHurt(client, iEntityID, 50, iWeaponId, g_cFlameThrowerAmmoName, DMG_BURN|DMG_BLAST);
         if (!IsEntityOnFire(iEntityID))
         {
-            ExtinguishEntity(iEntityID);
             ExtinguishEntityEx(iEntityID);
             IgniteEntity(iEntityID, 5.0);
         }
@@ -636,7 +635,6 @@ void MoreFire_Event_PlayerDeath(Event event, const char[] name, bool dontBroadca
                 int m_hRagdoll = GetEntPropEnt(client, Prop_Send, "m_hRagdoll");
                 if (m_hRagdoll > MaxClients && IsValidEntity(m_hRagdoll))
                 {
-                    ExtinguishEntity(m_hRagdoll);
                     ExtinguishEntityEx(m_hRagdoll);
                     IgniteEntity(m_hRagdoll, 5.0);
                 }
@@ -898,10 +896,57 @@ public int IsEntityOnFire(int entity)
     }
     return false;
 }
+char g_cAntiFlameEntityNameList[][] = 
+{
+    "func_door", // Will crash server
+};
+public void IgniteEntityEx(int entity, float time)
+{
+    DataPack hDataPack = new DataPack();
+    hDataPack.WriteCell(EntIndexToEntRef(entity));
+    hDataPack.WriteFloat(time);
+    RequestFrame(IgniteEntityNextFrame, hDataPack);
+    return;
+}
+void IgniteEntityNextFrame(DataPack hDataPack)
+{
+    hDataPack.Reset();
+    int iEntityRef = hDataPack.ReadCell();
+    float time = hDataPack.ReadFloat();
+    delete hDataPack;
+    
+    if (time > 0)
+    {
+        int entity = EntRefToEntIndex(iEntityRef);
+        if (entity > 0 && IsValidEntity(entity) && !IsEntityOnFire(entity))
+        {
+            char cEntityName[128];
+            GetEntityClassname(entity, cEntityName, sizeof(cEntityName));
+            for (int i = 0; i < sizeof(g_cAntiFlameEntityNameList); i++)
+            {
+                if (StrEqual(cEntityName, g_cAntiFlameEntityNameList[i], false))
+                    return;
+            }
+            LogMessage("IgniteEntity entity=%d-%s time=%0.1f", entity, cEntityName, time);
+            IgniteEntity(entity, time);
+        }
+    }
+    
+    return;
+}
 public void ExtinguishEntityEx(int entity)
 {
     if (IsValidEntity(entity))
     {
+        char cEntityName[128];
+        GetEntityClassname(entity, cEntityName, sizeof(cEntityName));
+        for (int i = 0; i < sizeof(g_cAntiFlameEntityNameList); i++)
+        {
+            if (StrEqual(cEntityName, g_cAntiFlameEntityNameList[i], false))
+                return;
+        }
+        LogMessage("ExtinguishEntity entity=%d-%s", entity, cEntityName);
+        ExtinguishEntity(entity);
         // 玩家死亡时就算用的EventHookMode_Pre也无法使用m_hEffectEntity来获得火焰，只能遍历
         // 直接KILL会导致再次spawn前无法再着火
         int iFireEntity = GetEntPropEnt(entity, Prop_Data, "m_hEffectEntity");

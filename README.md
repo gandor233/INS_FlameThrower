@@ -214,6 +214,9 @@ FlameThrower plugin is using a custom particle file. But this game will have som
 
 ## Changelog
 ```
+v2.7:
+* Fixed fire on func_door entity crash server bug.
+
 v2.6:
 * Removed convar sm_ft_ignite.
 * Added convar sm_ft_ignite_enemy.
