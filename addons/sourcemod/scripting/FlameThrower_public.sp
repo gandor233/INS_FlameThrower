@@ -702,25 +702,25 @@ stock bool IsClientInPlayerTeam(int client)
     
     return false;
 }
-stock bool IsCoopEnemy(int client, int iGameModeClass, int iGameMode)
-{
-    if (iGameModeClass == GAME_MODE_CLASS_PVE)
-    {
-        int iClientTeam = GetClientTeam(client);
-        if (iGameMode == GAME_MODE_SURVIVAL)
-        {
-            if (iClientTeam == TEAM_1_SEC)
-                return true;
-        }
-        else
-        {
-            if (iClientTeam == TEAM_2_INS)
-                return true;
-        }
-    }
+// stock bool IsCoopEnemy(int client, int iGameModeClass, int iGameMode)
+// {
+//     if (iGameModeClass == GAME_MODE_CLASS_PVE)
+//     {
+//         int iClientTeam = GetClientTeam(client);
+//         if (iGameMode == GAME_MODE_SURVIVAL)
+//         {
+//             if (iClientTeam == TEAM_1_SEC)
+//                 return true;
+//         }
+//         else
+//         {
+//             if (iClientTeam == TEAM_2_INS)
+//                 return true;
+//         }
+//     }
 
-    return false;
-}
+//     return false;
+// }
 public int GetPlayerActiveWeapon(int client)
 {
     return GetEntPropEnt(client, Prop_Data, "m_hActiveWeapon");
@@ -994,7 +994,7 @@ public bool IsAntiFlameEntityName(char[] cEntityName)
 {
     for (int i = 0; i < sizeof(g_cAntiFlameEntityNameList); i++)
     {
-        if (StrEqual(cEntityName, g_cAntiFlameEntityNameList[i], false))
+        if (StrContains(cEntityName, g_cAntiFlameEntityNameList[i], false))
             return true;
     }
     return false;
