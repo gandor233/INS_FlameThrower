@@ -994,7 +994,7 @@ public bool IsAntiFlameEntityName(char[] cEntityName)
 {
     for (int i = 0; i < sizeof(g_cAntiFlameEntityNameList); i++)
     {
-        if (StrContains(cEntityName, g_cAntiFlameEntityNameList[i], false))
+        if (StrContains(cEntityName, g_cAntiFlameEntityNameList[i], false) > -1)
             return true;
     }
     return false;
