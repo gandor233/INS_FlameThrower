@@ -933,9 +933,9 @@ public void ExtinguishEntityEx(int entity)
 {
     if (IsValidEntity(entity))
     {
+        StopEntitySound(entity, "ambient/fire/fire_small_loop2.wav", SNDCHAN_WEAPON);
         char cEntityName[128];
         GetEntityClassname(entity, cEntityName, sizeof(cEntityName));
-        
         if (!IsAntiFlameEntityName(cEntityName))
         {
             if (DEBUG)
@@ -948,10 +948,7 @@ public void ExtinguishEntityEx(int entity)
         int iFireEntity = GetEntPropEnt(entity, Prop_Data, "m_hEffectEntity");
         if (IsValidEdict(iFireEntity) && HasEntProp(iFireEntity, Prop_Data, "m_flLifetime"))
         {
-            StopEntitySound(iFireEntity, "ambient/fire/fire_small_loop2.wav");
-            StopEntitySound(iFireEntity, "ambient/fire/fire_small_loop_edit_01.wav");
-            StopEntitySound(iFireEntity, "ambient/fire/fire_small_loop_edit_02.wav");
-            StopEntitySound(iFireEntity, "ambient/fire/fire_small_loop_edit_03.wav");
+            StopEntitySound(iFireEntity, "ambient/fire/fire_small_loop2.wav", SNDCHAN_WEAPON);
             AcceptEntityInput(iFireEntity, "DisableDraw");
             AcceptEntityInput(iFireEntity, "DisableDamageForces");
             SetEntPropFloat(iFireEntity, Prop_Data, "m_flLifetime", 0.0);
@@ -969,10 +966,7 @@ public void ExtinguishEntityEx(int entity)
                     {
                         if (GetEntPropEnt(iFireEntity, Prop_Data, "m_pParent") == entity)
                         {
-                            StopEntitySound(iFireEntity, "ambient/fire/fire_small_loop2.wav");
-                            StopEntitySound(iFireEntity, "ambient/fire/fire_small_loop_edit_01.wav");
-                            StopEntitySound(iFireEntity, "ambient/fire/fire_small_loop_edit_02.wav");
-                            StopEntitySound(iFireEntity, "ambient/fire/fire_small_loop_edit_03.wav");
+                            StopEntitySound(iFireEntity, "ambient/fire/fire_small_loop2.wav", SNDCHAN_WEAPON);
                             AcceptEntityInput(iFireEntity, "DisableDraw");
                             AcceptEntityInput(iFireEntity, "DisableDamageForces");
                             SetEntPropFloat(iFireEntity, Prop_Data, "m_flLifetime", 0.0);
@@ -989,6 +983,7 @@ public void ExtinguishEntityEx(int entity)
 char g_cAntiFlameEntityNameList[][] = 
 {
     "func_", // Will crash server
+    "weapon_", // 玩家的武器着火后，在玩家重生时有燃烧音效可能继承并永不停止
 };
 public bool IsAntiFlameEntityName(char[] cEntityName)
 {
