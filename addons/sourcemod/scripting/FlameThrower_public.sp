@@ -4,7 +4,7 @@
  * @Github: https://github.com/gandor233
  */
 #define PLUGIN_NAME "Flamethrower"
-#define PLUGIN_VERSION "Public 2.8"
+#define PLUGIN_VERSION "Public 2.9"
 public Plugin myinfo = 
 {
     name = "Flamethrower",
@@ -74,6 +74,7 @@ float g_fFlameThrowerBurnDuration;
 float g_fFlameThrowerFireInterval;
 float g_fFlameThrowerEnemyDamageMultiplier;
 float g_fFlameThrowerFriendDamageMultiplier;
+float g_fFlameThrowerVIPDamageMultiplier;
 float g_fFlameThrowerSelfDamageMultiplier;
 char g_cFlameThrowerAmmoName[MAX_NAME_LENGTH];
 
@@ -86,9 +87,10 @@ ConVar sm_ft_self_ignite;
 ConVar sm_ft_ignite_enemy;
 ConVar sm_ft_ignite_friend;
 ConVar sm_ft_ammo_class_name;
+ConVar sm_ft_self_damage_mult;
 ConVar sm_ft_enemy_damage_mult;
 ConVar sm_ft_friend_damage_mult;
-ConVar sm_ft_self_damage_mult;
+ConVar sm_ft_vip_damage_mult;
 ConVar sm_ft_fire_interval;
 ConVar sm_ft_sound_enable;
 ConVar sm_ft_start_sound_sec;
@@ -115,6 +117,7 @@ public void OnPluginStart()
     sm_ft_self_damage_mult = CreateConVar("sm_ft_self_damage_mult", "0.2", "Flamethrower self direct damage multiplier.");
     sm_ft_enemy_damage_mult = CreateConVar("sm_ft_enemy_damage_mult", "5.0", "Flamethrower direct damage multiplier for enemies.");
     sm_ft_friend_damage_mult = CreateConVar("sm_ft_friend_damage_mult", "1.0", "Flamethrower direct damage multiplier for friends.");
+    sm_ft_vip_damage_mult = CreateConVar("sm_ft_vip_damage_mult", "1.0", "Flamethrower direct damage multiplier for VIP (Who has the admin flag 'a').");
     sm_ft_fire_interval = CreateConVar("sm_ft_fire_interval", "0.12", "Flamethrower launch interval. Closed if less than 0.08.");
     sm_ft_burn_time.AddChangeHook(OnConVarChanged);
     sm_ft_self_ignite.AddChangeHook(OnConVarChanged);
@@ -123,6 +126,7 @@ public void OnPluginStart()
     sm_ft_ammo_class_name.AddChangeHook(OnConVarChanged);
     sm_ft_enemy_damage_mult.AddChangeHook(OnConVarChanged);
     sm_ft_friend_damage_mult.AddChangeHook(OnConVarChanged);
+    sm_ft_vip_damage_mult.AddChangeHook(OnConVarChanged);
     sm_ft_self_damage_mult.AddChangeHook(OnConVarChanged);
     sm_ft_fire_interval.AddChangeHook(OnConVarChanged);
     OnConVarChanged(null, "", "");
@@ -159,6 +163,7 @@ public void OnConVarChanged(ConVar convar, const char[] oldValue, const char[] n
     g_fFlameThrowerSelfDamageMultiplier = sm_ft_self_damage_mult.FloatValue;
     g_fFlameThrowerEnemyDamageMultiplier = sm_ft_enemy_damage_mult.FloatValue;
     g_fFlameThrowerFriendDamageMultiplier = sm_ft_friend_damage_mult.FloatValue;
+    g_fFlameThrowerVIPDamageMultiplier = sm_ft_vip_damage_mult.FloatValue;
     sm_ft_ammo_class_name.GetString(g_cFlameThrowerAmmoName, sizeof(g_cFlameThrowerAmmoName));
     return;
 }
@@ -283,6 +288,12 @@ public Action OnTakeDamage(int victim, int& attacker, int& inflictor, float& dam
                                 BurnPlayer(attacker, victim, g_fFlameThrowerBurnDuration);
                             damage = damage * g_fFlameThrowerEnemyDamageMultiplier;
                         }
+                    }
+                    
+                    int iClientFlag = GetUserFlagBits(victim);
+                    if (iClientFlag & ADMFLAG_GENERIC)
+                    {
+                        damage = damage * g_fFlameThrowerVIPDamageMultiplier;
                     }
                     
                     return Plugin_Changed;

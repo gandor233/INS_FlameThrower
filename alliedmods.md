@@ -3,7 +3,7 @@
 [ATTACH]189544[/ATTACH]
 
 [SIZE="4"]Version[/SIZE]
- [LIST][*]Public 2.8[/LIST]
+ [LIST][*]Public 2.9[/LIST]
 
 [SIZE="4"]Feature list[/SIZE]
 [LIST][*]Ignite and kill other players
@@ -71,6 +71,10 @@ sm_ft_enemy_damage_mult "5.0"
 // Flamethrower direct damage multiplier for friends.
 // Default: "1.0"
 sm_ft_friend_damage_mult "1.0"
+
+// Flamethrower direct damage multiplier for VIP (Who has the admin flag 'a').
+// Default: "1.0"
+sm_ft_vip_damage_mult "1.0"
 
 // Flamethrower launch interval. Closed if less than 0.08.
 // Default: "0.12"
@@ -204,6 +208,9 @@ If you have a fastdl server. Download version 2.5+ Flamethrower_Particles.zip or
 
 [SIZE="4"]Changelog[/SIZE]
 [CODE]
+v2.9:
+* Added convar sm_ft_vip_damage_mult.
+
 v2.8:
 * Fixed fire loop sound doesn't stop problem.
 * Replaced Reconnect with lol_reconnect.
